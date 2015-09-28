@@ -1,0 +1,60 @@
+apply plugin: 'maven'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'shadow'
+
+buildscript {
+    repositories {
+        maven {
+            name 'Shadow'
+            url 'http://dl.bintray.com/content/johnrengelman/gradle-plugins'
+        }
+        mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath 'org.gradle.plugins:shadow:0.7.4'
+        classpath 'org.ajoberstar:gradle-git:0.8.0'
+    }
+
+}
+
+archivesBaseName = "FourierPlots"
+group = 'tterrag.fourier'
+description = "COSC409 Project 1"
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+import org.ajoberstar.grgit.Grgit
+
+if (System.getenv('BUILD_NUMBER') != null) {
+    version += ".${System.getenv('BUILD_NUMBER')}"
+} else if (new File(projectDir, '.git').exists()) {
+    def repo = Grgit.open(project.file('.'))
+    version += ".${repo.log().find().abbreviatedId}"
+} else {
+    version += ".CUSTOM"
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+jar.manifest {
+    attributes 'Main-Class': 'tterrag.fourier.FourierPlots'
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'erichseifert.de'
+        url = 'http://mvn.erichseifert.de/maven2'
+    }
+}
+
+dependencies {
+    compile 'de.erichseifert.gral:gral-core:0.10'
+    compile 'com.google.guava:guava:17.0'
+    compile 'org.projectlombok:lombok:1.16.6'
+}
