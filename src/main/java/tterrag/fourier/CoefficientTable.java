@@ -39,4 +39,9 @@ public class CoefficientTable
     {
         return getDataForM(n).getBn();
     }
+    
+	public int getSize() 
+	{
+		return coefts.length;
+	}
 }

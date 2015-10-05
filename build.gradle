@@ -57,4 +57,5 @@ dependencies {
     compile 'de.erichseifert.gral:gral-core:0.10'
     compile 'com.google.guava:guava:17.0'
     compile 'org.projectlombok:lombok:1.16.6'
+    compile 'com.miglayout:miglayout:3.7.4'
 }
