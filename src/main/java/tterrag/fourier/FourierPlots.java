@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -180,7 +181,7 @@ public class FourierPlots extends JFrame
             revalidate();
             repaint();
         }
-        else if (idx == aFields.size() - 1 && !(an.getText().isEmpty() && bn.getText().isEmpty()))
+        else if (idx < 9 && idx == aFields.size() - 1 && !(an.getText().isEmpty() && bn.getText().isEmpty()))
         {
             JLabel lbl = new JLabel("" + (idx + 2));
             userInput.add(lbl, "cell 3 " + (idx + 2) + ",alignx trailing");
@@ -223,6 +224,7 @@ public class FourierPlots extends JFrame
 //                dataTwo.add(x, func.compute(x, table.getSize() - 1));
             }
             
+            plot.getAxis(XYPlot.AXIS_X).setRange(-0.5, Math.PI * 2);
             plot.getAxis(XYPlot.AXIS_Y).setRange(-pct + 4, pct + 2);
         }
         
@@ -250,6 +252,7 @@ public class FourierPlots extends JFrame
         plots.setSize(plots.userInput.getSize());
         plots.userInput.setVisible(true);
         plots.graph.setVisible(false);
+        UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
         plots.setVisible(true);
 //        plots.setExtendedState(plots.getExtendedState() | JFrame.MAXIMIZED_BOTH);
         plots.setIconImage(ImageIO.read(FourierPlots.class.getResourceAsStream("/icon.png")));
