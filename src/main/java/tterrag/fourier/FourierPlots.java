@@ -75,7 +75,7 @@ public class FourierPlots extends JFrame
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         userInput = new JPanel(new MigLayout("", "20[][][][10px:50px:50px][][][][][]", "[][][]"));
-        userInput.setSize(420, 320);
+        userInput.setSize(800, 600);
 
         JLabel lblA_2 = new JLabel("a");
         userInput.add(lblA_2, "cell 4 0,alignx center");
@@ -156,6 +156,7 @@ public class FourierPlots extends JFrame
         plotOne.getAxisRenderer(XYPlot.AXIS_X).setShapeColor(Color.WHITE);
         plotOne.getAxisRenderer(XYPlot.AXIS_X).setTickColor(Color.WHITE);
         plotOne.getAxisRenderer(XYPlot.AXIS_X).setMinorTickColor(Color.WHITE);
+        plotOne.getAxisRenderer(XYPlot.AXIS_Y).setTickLabelsOutside(false);
         plotOne.getAxisRenderer(XYPlot.AXIS_Y).setShapeColor(Color.WHITE);
         plotOne.getAxisRenderer(XYPlot.AXIS_Y).setTickSpacing(Integer.MAX_VALUE);
 
@@ -163,6 +164,7 @@ public class FourierPlots extends JFrame
         plotTwo.getAxisRenderer(XYPlot.AXIS_X).setShapeColor(Color.WHITE);
         plotTwo.getAxisRenderer(XYPlot.AXIS_X).setTickColor(Color.WHITE);
         plotTwo.getAxisRenderer(XYPlot.AXIS_X).setMinorTickColor(Color.WHITE);
+        plotTwo.getAxisRenderer(XYPlot.AXIS_Y).setTickLabelsOutside(false);
         plotTwo.getAxisRenderer(XYPlot.AXIS_Y).setShapeColor(Color.WHITE);
         plotTwo.getAxisRenderer(XYPlot.AXIS_Y).setTickSpacing(Integer.MAX_VALUE);
 
@@ -283,7 +285,7 @@ public class FourierPlots extends JFrame
     @SneakyThrows
     public static void main(String[] args)
     {
-        UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
         FourierPlots plots = new FourierPlots();
         plots.setSize(plots.userInput.getSize());
