@@ -5,6 +5,7 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -21,10 +22,14 @@ import javax.swing.event.DocumentListener;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import net.miginfocom.swing.MigLayout;
+
+import com.google.common.collect.Lists;
+
 import de.erichseifert.gral.data.DataTable;
 import de.erichseifert.gral.plots.XYPlot;
 import de.erichseifert.gral.plots.lines.DefaultLineRenderer2D;
 import de.erichseifert.gral.ui.DrawablePanel;
+import de.erichseifert.gral.util.Tuple;
 
 public class FourierPlots extends JFrame
 {
@@ -55,10 +60,9 @@ public class FourierPlots extends JFrame
     private static final long serialVersionUID = -5947732987140329400L;
 
     private JPanel userInput, graph;
-    
+
     private DataTable dataOne, dataTwo;
-    private XYPlot plot;
-    private double pct = 10000;
+    private XYPlot plotOne, plotTwo;
     private boolean lock = true;
     private JTextField txtA;
     private List<JLabel> coeftLabels;
@@ -69,10 +73,10 @@ public class FourierPlots extends JFrame
     public FourierPlots()
     {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        
+
         userInput = new JPanel(new MigLayout("", "20[][][][10px:50px:50px][][][][][]", "[][][]"));
-        userInput.setSize(500, 300);
-        
+        userInput.setSize(420, 320);
+
         JLabel lblA_2 = new JLabel("a");
         userInput.add(lblA_2, "cell 4 0,alignx center");
 
@@ -85,15 +89,17 @@ public class FourierPlots extends JFrame
         JButton btnPlot = new JButton("Plot!");
         btnPlot.setFocusable(false);
         btnPlot.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				userInput.setVisible(false);
-				graph.setVisible(true);
-				lock = false;
-			}
-		});
-        
+
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                userInput.setVisible(false);
+                graph.setVisible(true);
+                lock = false;
+                setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
+            }
+        });
+
         userInput.add(btnPlot, "cell 1 2,alignx center,aligny center");
 
         txtA = new JTextField();
@@ -105,7 +111,7 @@ public class FourierPlots extends JFrame
         userInput.add(rootLabel, "cell 3 1,alignx trailing");
         coeftLabels = new ArrayList<>();
         coeftLabels.add(rootLabel);
-        
+
         aFields = new ArrayList<>();
         bFields = new ArrayList<>();
 
@@ -120,9 +126,9 @@ public class FourierPlots extends JFrame
         rootBField.setColumns(10);
         rootBField.getDocument().addDocumentListener(new CoeftListener(rootBField));
         bFields.add(rootBField);
-        
+
         getContentPane().add(userInput);
-        
+
         graph = new JPanel();
         graph.setLayout(new BoxLayout(graph, BoxLayout.X_AXIS));
 
@@ -130,32 +136,38 @@ public class FourierPlots extends JFrame
         dataTwo = new DataTable(Double.class, Double.class);
         dataOne.add(0D, 0D);
         dataTwo.add(0D, 0D);
-        
-        plot = new XYPlot(dataOne);
 
-        plot.add(dataTwo);
-        plot.add(dataOne);
-        plot.getAxis(XYPlot.AXIS_X).setRange(-1, Math.PI * 2);
+        plotOne = new XYPlot(dataOne);
+        plotTwo = new XYPlot(dataTwo);
 
-        plot.setLineRenderer(dataOne, new DefaultLineRenderer2D());
-        plot.setLineRenderer(dataTwo, new DefaultLineRenderer2D());
+        plotOne.setLineRenderer(dataOne, new DefaultLineRenderer2D());
+        plotTwo.setLineRenderer(dataTwo, new DefaultLineRenderer2D());
 
-        plot.getPointRenderer(dataOne).setColor(Color.WHITE);
-        plot.getPointRenderer(dataOne).setShape(new Rectangle());
+        plotOne.getPointRenderer(dataOne).setColor(Color.WHITE);
+        plotOne.getPointRenderer(dataOne).setShape(new Rectangle());
 
-        plot.getLineRenderer(dataOne).setColor(Color.ORANGE);
-        plot.getLineRenderer(dataTwo).setColor(Color.GRAY);
+        plotTwo.getPointRenderer(dataTwo).setColor(Color.WHITE);
+        plotTwo.getPointRenderer(dataTwo).setShape(new Rectangle());
 
-        plot.getPlotArea().setBackground(Color.BLACK);
-        plot.getAxisRenderer(XYPlot.AXIS_X).setShapeColor(Color.WHITE);
-        plot.getAxisRenderer(XYPlot.AXIS_X).setTickColor(Color.WHITE);
-        plot.getAxisRenderer(XYPlot.AXIS_X).setMinorTickColor(Color.WHITE);
-        plot.getAxisRenderer(XYPlot.AXIS_Y).setShapeColor(Color.WHITE);
-        plot.getAxisRenderer(XYPlot.AXIS_Y).setTickSpacing(Integer.MAX_VALUE);
+        plotOne.getLineRenderer(dataOne).setColor(Color.ORANGE);
+        plotTwo.getLineRenderer(dataTwo).setColor(Color.GRAY);
 
-        plot.setBounds(0, 0, 100, 100);
-        
-        graph.add(new DrawablePanel(plot));
+        plotOne.getPlotArea().setBackground(Color.BLACK);
+        plotOne.getAxisRenderer(XYPlot.AXIS_X).setShapeColor(Color.WHITE);
+        plotOne.getAxisRenderer(XYPlot.AXIS_X).setTickColor(Color.WHITE);
+        plotOne.getAxisRenderer(XYPlot.AXIS_X).setMinorTickColor(Color.WHITE);
+        plotOne.getAxisRenderer(XYPlot.AXIS_Y).setShapeColor(Color.WHITE);
+        plotOne.getAxisRenderer(XYPlot.AXIS_Y).setTickSpacing(Integer.MAX_VALUE);
+
+        plotTwo.getPlotArea().setBackground(Color.BLACK);
+        plotTwo.getAxisRenderer(XYPlot.AXIS_X).setShapeColor(Color.WHITE);
+        plotTwo.getAxisRenderer(XYPlot.AXIS_X).setTickColor(Color.WHITE);
+        plotTwo.getAxisRenderer(XYPlot.AXIS_X).setMinorTickColor(Color.WHITE);
+        plotTwo.getAxisRenderer(XYPlot.AXIS_Y).setShapeColor(Color.WHITE);
+        plotTwo.getAxisRenderer(XYPlot.AXIS_Y).setTickSpacing(Integer.MAX_VALUE);
+
+        graph.add(new DrawablePanel(plotOne));
+        graph.add(new DrawablePanel(plotTwo));
         getContentPane().add(graph);
     }
 
@@ -186,7 +198,7 @@ public class FourierPlots extends JFrame
             JLabel lbl = new JLabel("" + (idx + 2));
             userInput.add(lbl, "cell 3 " + (idx + 2) + ",alignx trailing");
             coeftLabels.add(lbl);
-            
+
             JTextField aField = new JTextField();
             userInput.add(aField, "cell 4 " + (idx + 2) + ",growx");
             aField.setColumns(10);
@@ -204,42 +216,65 @@ public class FourierPlots extends JFrame
         }
     }
 
+    private List<Tuple> values = Lists.newArrayList();
+    private Iterator<Tuple> iterator = null;
+    private double minY1, maxY1, minY2, maxY2;
+    private double zoomOut = 0, maxZoom = 0.5;
+
     public void update()
     {
-        pct = Math.max(5, Math.pow(pct, 0.95) - 0.1);
-
-        if (lock && graph.isVisible() && dataOne.getColumn(0).size() == 1)
-        {        	
+        if (lock && graph.isVisible() && values.isEmpty())
+        {
             CoefficientTable table = new CoefficientTable(aFields.size() - 1);
             for (int i = 0; i < aFields.size() - 1; i++)
             {
-            	table.addCoefts(i + 1, Double.parseDouble(aFields.get(i).getText()), Double.parseDouble(bFields.get(i).getText()));
+                table.addCoefts(i + 1, Double.parseDouble(aFields.get(i).getText()), Double.parseDouble(bFields.get(i).getText()));
             }
-            
+
             FourierFunction func = new FourierFunction(Double.parseDouble(txtA.getText()), table);
 
-            for (double x = 0; x <= Math.PI * 8; x += Math.PI / 150)
+            for (double x = 0; x <= Math.PI * 2; x += Math.PI / 250)
             {
-                dataOne.add(x, func.compute(x, table.getSize()));
-//                dataTwo.add(x, func.compute(x, table.getSize() - 1));
+                double y = func.compute(x, table.getSize());
+                values.add(new Tuple(x, y, func.compute(x, table.getSize() - 1)));
             }
-            
-            plot.getAxis(XYPlot.AXIS_X).setRange(-0.5, Math.PI * 2);
-            plot.getAxis(XYPlot.AXIS_Y).setRange(-pct + 4, pct + 2);
+
+            iterator = values.iterator();
         }
-        
+
+        if (iterator != null && iterator.hasNext())
+        {
+            Tuple data = iterator.next();
+            dataOne.add((Double) data.get(0), (Double) data.get(1));
+            dataTwo.add((Double) data.get(0), (Double) data.get(2));
+            if (!iterator.hasNext())
+            {
+                minY1 = plotOne.getAxis(XYPlot.AXIS_Y).getMin().doubleValue();
+                maxY1 = plotOne.getAxis(XYPlot.AXIS_Y).getMax().doubleValue();
+                minY2 = plotTwo.getAxis(XYPlot.AXIS_Y).getMin().doubleValue();
+                maxY2 = plotTwo.getAxis(XYPlot.AXIS_Y).getMax().doubleValue();
+            }
+        }
+        else if (iterator != null && zoomOut < maxZoom)
+        {
+            plotOne.getAxis(XYPlot.AXIS_Y).setMin(minY1 - zoomOut);
+            plotOne.getAxis(XYPlot.AXIS_Y).setMax(maxY1 + zoomOut);
+            plotTwo.getAxis(XYPlot.AXIS_Y).setMin(minY2 - zoomOut);
+            plotTwo.getAxis(XYPlot.AXIS_Y).setMax(maxY2 + zoomOut);
+            zoomOut += 0.01;
+        }
+
         if (!lock)
         {
-            plot.getAxis(XYPlot.AXIS_Y).setRange(-pct + 4, pct + 2);
-            
-            if (pct == 5)
-            {
-                lock = true;
-                plot.getNavigator().setDefaultState();
-                plot.getAxisRenderer(XYPlot.AXIS_Y).setTickSpacing(1);
-                plot.getAxisRenderer(XYPlot.AXIS_Y).setTickColor(Color.WHITE);
-                plot.getAxisRenderer(XYPlot.AXIS_Y).setMinorTickColor(Color.WHITE);
-            }
+            lock = true;
+            plotOne.getNavigator().setDefaultState();
+            plotOne.getAxisRenderer(XYPlot.AXIS_Y).setTickSpacing(1);
+            plotOne.getAxisRenderer(XYPlot.AXIS_Y).setTickColor(Color.WHITE);
+            plotOne.getAxisRenderer(XYPlot.AXIS_Y).setMinorTickColor(Color.WHITE);
+            plotTwo.getNavigator().setDefaultState();
+            plotTwo.getAxisRenderer(XYPlot.AXIS_Y).setTickSpacing(1);
+            plotTwo.getAxisRenderer(XYPlot.AXIS_Y).setTickColor(Color.WHITE);
+            plotTwo.getAxisRenderer(XYPlot.AXIS_Y).setMinorTickColor(Color.WHITE);
         }
 
         repaint();
@@ -248,27 +283,22 @@ public class FourierPlots extends JFrame
     @SneakyThrows
     public static void main(String[] args)
     {
+        UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+
         FourierPlots plots = new FourierPlots();
         plots.setSize(plots.userInput.getSize());
+        plots.setLocationRelativeTo(null);
         plots.userInput.setVisible(true);
         plots.graph.setVisible(false);
-        UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
         plots.setVisible(true);
-//        plots.setExtendedState(plots.getExtendedState() | JFrame.MAXIMIZED_BOTH);
         plots.setIconImage(ImageIO.read(FourierPlots.class.getResourceAsStream("/icon.png")));
-        
-        //
-        // DrawablePanel panel = new DrawablePanel(plots.plot);
-        // plots.getContentPane().add(panel);
-        //
-        // plots.plot.setBounds(0, 0, 500, 500);
 
         while (true)
         {
-            Thread.sleep(20);
+            Thread.sleep(5);
             if (plots.graph.isVisible())
             {
-            	plots.update();
+                plots.update();
             }
         }
     }
