@@ -254,6 +254,8 @@ public class FourierPlots extends JFrame
                 minY2 = plotTwo.getAxis(XYPlot.AXIS_Y).getMin().doubleValue();
                 maxY2 = plotTwo.getAxis(XYPlot.AXIS_Y).getMax().doubleValue();
             }
+
+            repaint();
         }
         else if (iterator != null && zoomOut < maxZoom)
         {
@@ -262,6 +264,8 @@ public class FourierPlots extends JFrame
             plotTwo.getAxis(XYPlot.AXIS_Y).setMin(minY2 - zoomOut);
             plotTwo.getAxis(XYPlot.AXIS_Y).setMax(maxY2 + zoomOut);
             zoomOut += 0.01;
+            
+            repaint();
         }
 
         if (!lock)
@@ -275,9 +279,9 @@ public class FourierPlots extends JFrame
             plotTwo.getAxisRenderer(XYPlot.AXIS_Y).setTickSpacing(1);
             plotTwo.getAxisRenderer(XYPlot.AXIS_Y).setTickColor(Color.WHITE);
             plotTwo.getAxisRenderer(XYPlot.AXIS_Y).setMinorTickColor(Color.WHITE);
+            
+            repaint();
         }
-
-        repaint();
     }
 
     @SneakyThrows
