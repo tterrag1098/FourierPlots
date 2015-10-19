@@ -1,24 +1,21 @@
-apply plugin: 'maven'
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'shadow'
-
 buildscript {
     repositories {
-        maven {
-            name 'Shadow'
-            url 'http://dl.bintray.com/content/johnrengelman/gradle-plugins'
-        }
         mavenCentral()
         mavenLocal()
     }
     dependencies {
-        classpath 'org.gradle.plugins:shadow:0.7.4'
         classpath 'org.ajoberstar:gradle-git:0.8.0'
     }
-
 }
+
+plugins {
+  id 'com.github.johnrengelman.shadow' version '1.2.2'
+}
+
+apply plugin: 'maven'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
 
 archivesBaseName = "FourierPlots"
 group = 'tterrag.fourier'
@@ -58,4 +55,10 @@ dependencies {
     compile 'com.google.guava:guava:17.0'
     compile 'org.projectlombok:lombok:1.16.6'
     compile 'com.miglayout:miglayout:3.7.4'
+}
+
+shadowJar {
+  dependencies {
+    exclude(dependency('org.projectlombok:lombok:1.16.6'))
+  }
 }
