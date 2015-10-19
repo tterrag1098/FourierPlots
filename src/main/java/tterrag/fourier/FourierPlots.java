@@ -1,7 +1,10 @@
 package tterrag.fourier;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -14,11 +17,18 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import net.miginfocom.swing.MigLayout;
@@ -57,8 +67,55 @@ public class FourierPlots extends JFrame
         }
     }
 
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    private static class CoeftFilter extends DocumentFilter
+    {
+        public static final CoeftFilter INSTANCE = new CoeftFilter();
+
+        @Override
+        public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException
+        {
+            if (isNumber(string))
+            {
+                super.insertString(fb, offset, string, attr);
+            }
+            else
+            {
+                Toolkit.getDefaultToolkit().beep();
+            }
+        }
+
+        @Override
+        public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException
+        {
+            if (isNumber(text))
+            {
+                super.replace(fb, offset, length, text, attrs);
+            }
+            else
+            {
+                Toolkit.getDefaultToolkit().beep();
+            }
+        }
+
+        private boolean isNumber(String string)
+        {
+            for (char c : string.toCharArray())
+            {
+                if (!Character.isDigit(c) && c != '.') { return false; }
+            }
+            return true;
+        }
+
+        public static void filter(JTextField f)
+        {
+            ((AbstractDocument) f.getDocument()).setDocumentFilter(CoeftFilter.INSTANCE);
+        }
+    }
+
     private static final long serialVersionUID = -5947732987140329400L;
 
+    private JScrollPane userInputScr;
     private JPanel userInput, graph;
 
     private DataTable dataOne, dataTwo;
@@ -75,7 +132,7 @@ public class FourierPlots extends JFrame
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         userInput = new JPanel(new MigLayout("", "20[][][][10px:50px:50px][][][][][]", "[][][]"));
-        userInput.setSize(800, 600);
+        userInputScr = new JScrollPane(userInput, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         JLabel lblA_2 = new JLabel("a");
         userInput.add(lblA_2, "cell 4 0,alignx center");
@@ -93,7 +150,30 @@ public class FourierPlots extends JFrame
             @Override
             public void actionPerformed(ActionEvent e)
             {
+                if (txtA.getText().isEmpty())
+                {
+                    Toolkit.getDefaultToolkit().beep();
+                    return;
+                }
+                for (JTextField t : aFields.subList(0, aFields.size() - 1))
+                {
+                    if (t.getText().isEmpty())
+                    {
+                        Toolkit.getDefaultToolkit().beep();
+                        return;
+                    }
+                }
+                for (JTextField t : bFields.subList(0, bFields.size() - 1))
+                {
+                    if (t.getText().isEmpty())
+                    {
+                        Toolkit.getDefaultToolkit().beep();
+                        return;
+                    }
+                }
                 userInput.setVisible(false);
+                getContentPane().remove(userInputScr);
+                getContentPane().add(graph);
                 graph.setVisible(true);
                 lock = false;
                 setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
@@ -103,6 +183,7 @@ public class FourierPlots extends JFrame
         userInput.add(btnPlot, "cell 1 2,alignx center,aligny center");
 
         txtA = new JTextField();
+        CoeftFilter.filter(txtA);
         txtA.setToolTipText("a0");
         userInput.add(txtA, "cell 1 1,alignx left");
         txtA.setColumns(10);
@@ -119,15 +200,18 @@ public class FourierPlots extends JFrame
         userInput.add(rootAField, "cell 4 1,growx");
         rootAField.setColumns(10);
         rootAField.getDocument().addDocumentListener(new CoeftListener(rootAField));
+        CoeftFilter.filter(rootAField);
         aFields.add(rootAField);
 
         JTextField rootBField = new JTextField();
         userInput.add(rootBField, "cell 6 1,growx");
         rootBField.setColumns(10);
         rootBField.getDocument().addDocumentListener(new CoeftListener(rootBField));
+        CoeftFilter.filter(rootBField);
         bFields.add(rootBField);
 
-        getContentPane().add(userInput);
+        setLayout(new BorderLayout());
+        getContentPane().add(userInputScr, BorderLayout.CENTER);
 
         graph = new JPanel();
         graph.setLayout(new BoxLayout(graph, BoxLayout.X_AXIS));
@@ -170,7 +254,6 @@ public class FourierPlots extends JFrame
 
         graph.add(new DrawablePanel(plotOne));
         graph.add(new DrawablePanel(plotTwo));
-        getContentPane().add(graph);
     }
 
     public void onBoxEdited(JTextField field)
@@ -195,7 +278,7 @@ public class FourierPlots extends JFrame
             revalidate();
             repaint();
         }
-        else if (idx < 9 && idx == aFields.size() - 1 && !(an.getText().isEmpty() && bn.getText().isEmpty()))
+        else if (idx < 29 && idx == aFields.size() - 1 && !(an.getText().isEmpty() && bn.getText().isEmpty()))
         {
             JLabel lbl = new JLabel("" + (idx + 2));
             userInput.add(lbl, "cell 3 " + (idx + 2) + ",alignx trailing");
@@ -205,12 +288,14 @@ public class FourierPlots extends JFrame
             userInput.add(aField, "cell 4 " + (idx + 2) + ",growx");
             aField.setColumns(10);
             aField.getDocument().addDocumentListener(new CoeftListener(aField));
+            CoeftFilter.filter(aField);
             aFields.add(aField);
 
             JTextField bField = new JTextField();
             userInput.add(bField, "cell 6 " + (idx + 2) + ",growx");
             bField.setColumns(10);
             bField.getDocument().addDocumentListener(new CoeftListener(bField));
+            CoeftFilter.filter(bField);
             bFields.add(bField);
 
             revalidate();
@@ -266,7 +351,7 @@ public class FourierPlots extends JFrame
             plotTwo.getAxis(XYPlot.AXIS_Y).setMin(minY2 - zoomOut);
             plotTwo.getAxis(XYPlot.AXIS_Y).setMax(maxY2 + zoomOut);
             zoomOut += 0.01;
-            
+
             repaint();
         }
 
@@ -281,7 +366,7 @@ public class FourierPlots extends JFrame
             plotTwo.getAxisRenderer(XYPlot.AXIS_Y).setTickSpacing(1);
             plotTwo.getAxisRenderer(XYPlot.AXIS_Y).setTickColor(Color.WHITE);
             plotTwo.getAxisRenderer(XYPlot.AXIS_Y).setMinorTickColor(Color.WHITE);
-            
+
             repaint();
         }
     }
@@ -292,10 +377,11 @@ public class FourierPlots extends JFrame
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
         FourierPlots plots = new FourierPlots();
-        plots.setSize(plots.userInput.getSize());
+        plots.setSize(800, 600);
         plots.setLocationRelativeTo(null);
-        plots.userInput.setVisible(true);
         plots.graph.setVisible(false);
+        plots.userInput.setVisible(true);
+        plots.userInput.setSize(new Dimension(800, 600));
         plots.setVisible(true);
         plots.setIconImage(ImageIO.read(FourierPlots.class.getResourceAsStream("/icon.png")));
 
