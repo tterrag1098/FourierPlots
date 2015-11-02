@@ -102,7 +102,7 @@ public class FourierPlots extends JFrame
         {
             for (char c : string.toCharArray())
             {
-                if (!Character.isDigit(c) && c != '.') { return false; }
+                if (!Character.isDigit(c) && c != '.' && c != '-') { return false; }
             }
             return true;
         }
