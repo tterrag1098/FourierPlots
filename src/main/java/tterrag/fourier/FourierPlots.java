@@ -131,8 +131,9 @@ public class FourierPlots extends JFrame
     {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        userInput = new JPanel(new MigLayout("", "20[][][][10px:50px:50px][][][][][]", "[][][]"));
+        userInput = new JPanel(new MigLayout("", "20px:130px:1000px[][][][10px:50px:50px][][][][][]", "[][][]"));
         userInputScr = new JScrollPane(userInput, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        userInput.setSize(800, 600);
 
         JLabel lblA_2 = new JLabel("a");
         userInput.add(lblA_2, "cell 4 0,alignx center");
