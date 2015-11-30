@@ -16,9 +16,9 @@ public class FourierFunction
     private double calcA(double x, int n)
     {
         double ret = 0;
-        for (int i = n; i > 0; i--)
+        for (int i = 1; i <= n; i++)
         {
-            ret += table.getAFor(i) * Math.cos(i * Math.PI * x);
+            ret += table.getAFor(i) * Math.cos(i * x);
         }
         return ret;
     }
@@ -26,9 +26,9 @@ public class FourierFunction
     private double calcB(double x, int n)
     {
         double ret = 0;
-        for (int i = n; i > 0; i--)
+        for (int i = 1; i <= n; i++)
         {
-            ret += table.getBFor(i) * Math.sin(i * Math.PI * x);
+            ret += table.getBFor(i) * Math.sin(i * x);
         }
         return ret;
     }

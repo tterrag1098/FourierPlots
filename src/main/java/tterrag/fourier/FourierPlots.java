@@ -116,7 +116,7 @@ public class FourierPlots extends JFrame
     private static final long serialVersionUID = -5947732987140329400L;
 
     private JScrollPane userInputScr;
-    private JPanel userInput, graph;
+    private JPanel userInput, graph, graphButtons;
 
     private DataTable dataOne, dataTwo;
     private XYPlot plotOne, plotTwo;
@@ -126,10 +126,10 @@ public class FourierPlots extends JFrame
     private List<JTextField> aFields;
     private List<JTextField> bFields;
 
-    @SuppressWarnings({ "unchecked" })
     public FourierPlots()
     {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        getContentPane().setBackground(Color.BLACK);
 
         userInput = new JPanel(new MigLayout("", "20px:130px:1000px[][][][10px:50px:50px][][][][][]", "[][][]"));
         userInputScr = new JScrollPane(userInput, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -174,8 +174,10 @@ public class FourierPlots extends JFrame
                 }
                 userInput.setVisible(false);
                 getContentPane().remove(userInputScr);
+                getContentPane().add(graphButtons);
                 getContentPane().add(graph);
                 graph.setVisible(true);
+                graphButtons.setVisible(true);
                 lock = false;
                 setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
             }
@@ -211,12 +213,49 @@ public class FourierPlots extends JFrame
         CoeftFilter.filter(rootBField);
         bFields.add(rootBField);
 
-        setLayout(new BorderLayout());
-        getContentPane().add(userInputScr, BorderLayout.CENTER);
+        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+        getContentPane().add(userInputScr);
 
         graph = new JPanel();
         graph.setLayout(new BoxLayout(graph, BoxLayout.X_AXIS));
+        
+        graphButtons = new JPanel();
+        graphButtons.setLayout(new BorderLayout());
+        graphButtons.setOpaque(true);
+        graphButtons.setBackground(Color.BLACK);
+        graphButtons.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
+        
+        JButton backButton = new JButton("Go back");
+        backButton.setBackground(Color.BLACK);
+        backButton.addActionListener(new ActionListener() {
+            
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                getContentPane().remove(graph);
+                getContentPane().remove(graphButtons);
+                getContentPane().add(userInputScr);
+                userInput.setVisible(true);
+                graph.setVisible(false);
+                initGraph();
+                revalidate();
+                repaint();
+            }
+        });
+      
+        graphButtons.add(backButton, BorderLayout.NORTH);
+        
+        initGraph();
+    }
 
+    @SuppressWarnings("unchecked")
+    private void initGraph()
+    {
+        graph.removeAll();
+        values.clear();
+        lock = true;
+        iterator = null;
+        
         dataOne = new DataTable(Double.class, Double.class);
         dataTwo = new DataTable(Double.class, Double.class);
         dataOne.add(0D, 0D);
